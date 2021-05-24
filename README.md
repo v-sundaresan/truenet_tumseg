@@ -2,7 +2,8 @@
 
 ## Brain Tumour Segmentation with TrUE-Net tool
 
-### Preprint (to be updated)
+### Won 5th highest score in MICCAI Brain Tumour Segmentation Challenge 2020
+## Preprint (to be updated)
 
 #### Software versions used for truenet:
 - Python > 3.6
@@ -13,8 +14,8 @@
 
 ## TrUE-Net architecture:
 <img
-src="images/main_architecture_final.png"
-alt="Triplanar U-Net ensemble network (TrUE-Net). (a) U-Net model used in individual planes, (b) Overall TrUE-Net architecture."
+src="images/Network_architecture.png"
+alt="Proposed triplanar ensemble network architecture. (a) Input modalities in the axial plane along with manual segmentations for NCR/NET (blue), ET (yellow), ED (red) and TC (magenta), (b) the proposed network and (c) 3-layer deep U-Net blocks used in (b). Slices with 4 channels (input modalities) were provided to all U-nets."
 />
 
 ### Classes and the loss function:
@@ -38,13 +39,21 @@ We used FLAIR, T1, T1 CE and T2 as inputs for the model. We reoriented the image
 
 #### prepare_tumseg_data
 ```
-Usage: prepare_tumseg_data <FLAIR_image_name> <T1_image_name> <output_basename>
+Usage: prepare_tumseg_data <Base_modality_type> <output_basename> <FLAIR_image_name> <T1_image_name> <T1ce_image_name> <T2_image_name>
  
-The script prepares the FLAIR and T1 data to be used in FSL truenet with a specified output basename
-FLAIR_image_name  	name of the input unprocessed FLAIR image
-T1_image_name 	name of the input unprocessed T1 image
-output_basename 	name to be used for the processed FLAIR and T1 images (along with the absolute path); 
-                     output_basename_FLAIR.nii.gz, output_basename_T1.nii.gz and output_basename_WMmask.nii.gz will be saved
+The script applies the preprocessing pipeline on FLAIR, T1, T1ce and T2 to be used in FSL truenet_tumseg with a specified output basename
+Base_modality_name and output_basename are mandatory inputs
+Remaining inputs are optional, image corresponding to Base_modality_name must be provided. Images to be provided in the given order.
+In case you do not have a modality, provide 'None' for that modality.
+Base_modality_name = 	name of the modality that the rest will be registered to (preferable ~1mm iso); valid options: flair, t1, t1ce, t2
+output_basename = 	name to be used for the processed images (use absolute path); output_basename_FLAIR.nii.gz, output_basename_T1.nii.gz .... will be saved
+FLAIR_image_name = 	name of the input unprocessed FLAIR image
+T1_image_name = 	name of the input unprocessed T1 image
+T1ce_image_name = 	name of the input unprocessed T1-contrast enhanced image
+T2_image_name = 	name of the input unprocessed T2 image
+
+For example, if you have flair, t1 and t2 and want to register everything to t1, use the following command
+prepare_tumseg_data t1 path/to/outputbasename path/to/input_flair.nii.gz path/to/input_t1.nii.gz None path/to/input_t2.nii.gz 
 ```
 
 ## Running truenet brain tumor segmentation
