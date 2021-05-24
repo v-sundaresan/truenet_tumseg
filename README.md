@@ -11,13 +11,13 @@
 - FMRIB software library (FSL) 6.0
 
 ## TrUE-Net tumour segmentation results:
-<img width="200"
+<img width="500"
 src="images/Val_vis_res.png"
 alt="Results on BraTS'20 validation data from three sample subjects."
 />
 
 ## TrUE-Net tumour segmentation architecture:
-<img width="200"
+<img width="500"
 src="images/Network_architecture.png"
 alt="Proposed triplanar ensemble network architecture. (a) Input modalities in the axial plane along with manual segmentations for NCR/NET (blue), ET (yellow), ED (red) and TC (magenta), (b) the proposed network and (c) 3-layer deep U-Net blocks used in (b). Slices with 4 channels (input modalities) were provided to all U-nets."
 />
