@@ -1,8 +1,6 @@
-# Triplanar U-Net ensemble network (TrUE-Net) model
-
+# Top 10 DL tool for MICCAI Brain Tumour Segmentation Challenge 2020
 ## Brain Tumour Segmentation with TrUE-Net tool
 
-### Won 5th highest score in MICCAI Brain Tumour Segmentation Challenge 2020
 ## Preprint (to be updated)
 
 #### Software versions used for truenet:
@@ -12,8 +10,14 @@
 #### Dependencies for prepare_truenet_data:
 - FMRIB software library (FSL) 6.0
 
-## TrUE-Net architecture:
-<img
+## TrUE-Net tumour segmentation results:
+<img width="200"
+src="images/Val_vis_res.png"
+alt="Results on BraTS'20 validation data from three sample subjects."
+/>
+
+## TrUE-Net tumour segmentation architecture:
+<img width="200"
 src="images/Network_architecture.png"
 alt="Proposed triplanar ensemble network architecture. (a) Input modalities in the axial plane along with manual segmentations for NCR/NET (blue), ET (yellow), ED (red) and TC (magenta), (b) the proposed network and (c) 3-layer deep U-Net blocks used in (b). Slices with 4 channels (input modalities) were provided to all U-nets."
 />
@@ -37,7 +41,7 @@ truenet_tumseg <subcommand> --help (e.g. truenet train --help)
 ## Preprocessing and preparing data for truenet
 We used FLAIR, T1, T1 CE and T2 as inputs for the model. We reoriented the images to the standard MNI space, performed skull-stripping FSL BET and registered the T1-weighted image to the FLAIR using linear rigid-body registration.
 
-#### prepare_tumseg_data
+## prepare_tumseg_data
 ```
 Usage: prepare_tumseg_data <Base_modality_type> <output_basename> <FLAIR_image_name> <T1_image_name> <T1ce_image_name> <T2_image_name>
  
