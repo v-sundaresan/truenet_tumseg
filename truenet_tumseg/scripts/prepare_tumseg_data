@@ -1,0 +1,319 @@
+#!/bin/sh
+#   Copyright (C) 2021 University of Oxford
+#   SHCOPYRIGHT
+#set -e
+#set -x
+
+######
+
+if [ $# -lt 3 ] ; then
+  echo "Usage: `basename $0` <Base_modality_type> <output_basename> <FLAIR_image_name> <T1_image_name> <T1ce_image_name> <T2_image_name>"
+  echo " "
+  echo "The script applies the preprocessing pipeline on FLAIR, T1, T1ce and T2 to be used in FSL truenet_tumseg with a specified output basename"
+  echo "Base_modality_name and output_basename are mandatory inputs"
+  echo "Remaining inputs are optional, image corresponding to Base_modality_name must be provided. Images to be provided in the given order."
+  echo "In case you do not have a modality, provide 'None' for that modality."
+  echo "Base_modality_name = 	name of the modality that the rest will be registered to (preferable ~1mm iso); valid options: flair, t1, t1ce, t2"
+  echo "output_basename = 	name to be used for the processed images (use absolute path); output_basename_FLAIR.nii.gz, output_basename_T1.nii.gz .... will be saved"
+  echo "FLAIR_image_name = 	name of the input unprocessed FLAIR image"
+  echo "T1_image_name = 	name of the input unprocessed T1 image"
+  echo "T1ce_image_name = 	name of the input unprocessed T1-contrast enhanced image"
+  echo "T2_image_name = 	name of the input unprocessed T2 image"
+  echo " "
+  echo "For example, if you have flair, t1 and t2 and want to register everything to t1, use the following command"
+  echo "prepare_tumseg_data t1 path/to/outputbasename path/to/input_flair.nii.gz path/to/input_t1.nii.gz None path/to/input_t2.nii.gz"  
+  exit 0
+fi
+
+error_exit()
+{
+  echo "Error: $1" 1>&2
+  exit 1
+}
+
+if [ $# -lt 6 ] ; then
+error_exit "Inputs missing! Cannot proceed..." 
+fi
+
+if [[ $1 == 'flair' || $1 == 't1' || $1 == 't1ce' || $1 == 't2' ]]; then
+base_type=$1
+else
+error_exit "Invalid option provided for Base_modality_type! Cannot proceed..."
+fi
+
+outbasename=$2
+outname=`basename ${outbasename}`
+outdir=`dirname ${outbasename}`
+pushd $outdir > /dev/null
+outdir=`pwd`
+popd > /dev/null
+
+flairfile=$3
+if [[ $flairfile == 'None' || $flairfile == 'none' ]]; then
+flairflag=0
+else
+flairflag=1
+flairimg=`basename ${flairfile} .nii.gz`
+flairdir=`dirname ${flairfile} `
+pushd $flairdir > /dev/null
+flairdir=`pwd`
+popd > /dev/null
+fi
+
+t1file=$4
+if [[ $t1file == 'None' || $t1file == 'none' ]]; then
+t1flag=0
+else
+t1flag=1
+t1img=`basename ${t1file} .nii.gz`
+t1dir=`dirname ${t1file} `
+pushd $t1dir > /dev/null
+t1dir=`pwd`
+popd > /dev/null
+fi
+
+t1cefile=$5
+if [[ $t1cefile == 'None' || $t1cefile == 'none' ]]; then
+t1ceflag=0
+else
+t1ceflag=1
+t1ceimg=`basename ${t1cefile} .nii.gz`
+t1cedir=`dirname ${t1cefile} `
+pushd $t1cedir > /dev/null
+t1cedir=`pwd`
+popd > /dev/null
+fi
+
+t2file=$6
+if [[ $t2file == 'None' || $t2file == 'none' ]]; then
+t2flag=0
+else
+t2flag=1
+t2img=`basename ${t2file} .nii.gz`
+t2dir=`dirname ${t2file} `
+pushd $t1dir > /dev/null
+t2dir=`pwd`
+popd > /dev/null
+fi
+
+if [[ $base_type == 'flair' ]]; then
+	if [ $flairflag -eq 0 ] ; then
+	error_exit "FLAIR_image_name cannot be None if Base_modality_type is flair! Cannot proceed..."
+	else
+	inbasename=$flairfile
+	fi
+elif [[ $base_type == 't1' ]]; then
+	if [ $t1flag -eq 0 ] ; then
+	error_exit "T1_image_name cannot be None if Base_modality_type is t1! Cannot proceed..."
+	else
+	inbasename=$t1file
+	fi
+elif [[ $base_type == 't1ce' ]]; then
+	if [ $t1ceflag -eq 0 ] ; then
+	error_exit "T1ce_image_name cannot be None if Base_modality_type is t1ce! Cannot proceed..."
+	else
+	inbasename=$t1cefile
+	fi
+elif [[ $base_type == 't2' ]]; then
+	if [ $t2flag -eq 0 ] ; then
+	error_exit "T2_image_name cannot be None if Base_modality_type is t2! Cannot proceed..."
+	else
+	inbasename=$t2file
+	fi
+fi
+
+# SPECIFY ORIGINAL DIRECTORY
+origdir=`pwd`
+
+# CREATE TEMPORARY DIRECTORY
+logID=`echo $(date | awk '{print $1 $2 $3}' |  sed 's/://g')`
+TMPVISDIR=`mktemp -d ${outdir}/tumseg_${logID}_${flairimg}_${t1img}_XXXXXX`
+
+# REORIENTING THE AVAILABLE IMAGES TO STD SPACE AND BRAIN EXTRACTION
+if [ $flairflag -eq 1 ] ; then
+$FSLDIR/bin/fslreorient2std ${flairfile}.nii.gz ${TMPVISDIR}/FLAIR.nii.gz
+$FSLDIR/bin/bet ${TMPVISDIR}/FLAIR.nii.gz ${TMPVISDIR}/FLAIR_brain.nii.gz
+$FSLDIR/bin/fslmaths ${TMPVISDIR}/FLAIR_brain.nii.gz -bin -fillh ${TMPVISDIR}/FLAIR_brain_mask.nii.gz
+fi
+if [ $t1flag -eq 1 ] ; then
+$FSLDIR/bin/fslreorient2std ${t1file}.nii.gz ${TMPVISDIR}/T1.nii.gz
+$FSLDIR/bin/bet ${TMPVISDIR}/T1.nii.gz ${TMPVISDIR}/T1_brain.nii.gz
+fi
+if [ $t1ceflag -eq 1 ] ; then
+$FSLDIR/bin/fslreorient2std ${t1cefile}.nii.gz ${TMPVISDIR}/T1ce.nii.gz
+$FSLDIR/bin/bet ${TMPVISDIR}/T1ce.nii.gz ${TMPVISDIR}/T1ce_brain.nii.gz
+fi
+if [ $t2flag -eq 1 ] ; then
+$FSLDIR/bin/fslreorient2std ${t2file}.nii.gz ${TMPVISDIR}/T2.nii.gz
+$FSLDIR/bin/bet ${TMPVISDIR}/T2.nii.gz ${TMPVISDIR}/T2_brain.nii.gz
+fi
+
+# CONSIDERING FLAIR AS BASE MODALITY; PROCESSING AVAILABLE MODALITIES WRT FLAIR
+if [[ $base_type == 'flair' ]]; then
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/FLAIR_brain.nii.gz ${outdir}/${outname}_FLAIR.nii.gz
+	if [ $t1flag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T1_brain.nii.gz -ref ${TMPVISDIR}/FLAIR_brain.nii.gz -out ${TMPVISDIR}/T1_2FLAIR.nii.gz -omat ${TMPVISDIR}/T1_2FLAIR.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T1.nii.gz -ref ${TMPVISDIR}/FLAIR.nii.gz -out ${TMPVISDIR}/T1_2FLAIR.nii.gz -init ${TMPVISDIR}/T1_2FLAIR.mat -applyxfm
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1_2FLAIR.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T1_2FLAIR_brain.nii.gz
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T1_2FLAIR_brain.nii.gz ${outdir}/${outname}_T1.nii.gz
+	fi
+	if [ $t1ceflag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T1ce_brain.nii.gz -ref ${TMPVISDIR}/FLAIR_brain.nii.gz -out ${TMPVISDIR}/T1ce_2FLAIR.nii.gz -omat ${TMPVISDIR}/T1ce_2FLAIR.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T1ce.nii.gz -ref ${TMPVISDIR}/FLAIR.nii.gz -out ${TMPVISDIR}/T1ce_2FLAIR.nii.gz -init ${TMPVISDIR}/T1ce_2FLAIR.mat -applyxfm
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2FLAIR.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T1ce_2FLAIR_brain.nii.gz
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T1ce_2FLAIR_brain.nii.gz ${outdir}/${outname}_T1ce.nii.gz
+	fi
+	if [ $t2flag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T2_brain.nii.gz -ref ${TMPVISDIR}/FLAIR_brain.nii.gz -out ${TMPVISDIR}/T2_2FLAIR.nii.gz -omat ${TMPVISDIR}/T2_2FLAIR.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T2.nii.gz -ref ${TMPVISDIR}/FLAIR.nii.gz -out ${TMPVISDIR}/T2_2FLAIR.nii.gz -init ${TMPVISDIR}/T2_2FLAIR.mat -applyxfm
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T2_2FLAIR.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T2_2FLAIR_brain.nii.gz
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T2_2FLAIR_brain.nii.gz ${outdir}/${outname}_T2.nii.gz
+	fi
+# CONSIDERING T1 AS BASE MODALITY; PROCESSING AVAILABLE MODALITIES WRT T1 (IF FLAIR, TAKE BRAIN_MASK FROM FLAIR)
+elif [[ $base_type == 't1' ]]; then
+	if [ $flairflag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/FLAIR_brain.nii.gz -ref ${TMPVISDIR}/T1_brain.nii.gz -out ${TMPVISDIR}/FLAIR_2T1.nii.gz -omat ${TMPVISDIR}/FLAIR_2T1.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/FLAIR.nii.gz -ref ${TMPVISDIR}/T1.nii.gz -out ${TMPVISDIR}/FLAIR_2T1.nii.gz -init ${TMPVISDIR}/FLAIR_2T1.mat -applyxfm
+	$FSLDIR/bin/bet ${TMPVISDIR}/FLAIR_2T1.nii.gz ${TMPVISDIR}/FLAIR_2T1_brain.nii.gz
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/FLAIR_2T1_brain.nii.gz -bin -fillh ${TMPVISDIR}/FLAIR_brain_mask.nii.gz
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/FLAIR_2T1_brain.nii.gz ${outdir}/${outname}_FLAIR.nii.gz
+	fi
+	if [ $t2flag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T2_brain.nii.gz -ref ${TMPVISDIR}/T1_brain.nii.gz -out ${TMPVISDIR}/T2_2T1.nii.gz -omat ${TMPVISDIR}/T2_2T1.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T2.nii.gz -ref ${TMPVISDIR}/T1.nii.gz -out ${TMPVISDIR}/T2_2T1.nii.gz -init ${TMPVISDIR}/T2_2T1.mat -applyxfm
+		if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T2_2T1.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T2_2T1_brain.nii.gz
+		else
+		$FSLDIR/bin/bet ${TMPVISDIR}/T2_2T1.nii.gz ${TMPVISDIR}/T2_2T1_brain.nii.gz
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T2_2T1_brain.nii.gz -bin -fillh ${TMPVISDIR}/T2_brain_mask.nii.gz
+		fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T2_2T1_brain.nii.gz ${outdir}/${outname}_T2.nii.gz
+	fi
+	if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T1_brain.nii.gz
+	elif [ -f "${TMPVISDIR}/T2_brain_mask.nii.gz" ]; then
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1.nii.gz -mul ${TMPVISDIR}/T2_brain_mask.nii.gz ${TMPVISDIR}/T1_brain.nii.gz
+	else
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1_brain.nii.gz -bin -fillh ${TMPVISDIR}/T1_brain_mask.nii.gz	
+	fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T1_brain.nii.gz ${outdir}/${outname}_T1.nii.gz
+	if [ $t1ceflag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T1ce_brain.nii.gz -ref ${TMPVISDIR}/T1_brain.nii.gz -out ${TMPVISDIR}/T1ce_2T1.nii.gz -omat ${TMPVISDIR}/T1ce_2T1.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T1ce.nii.gz -ref ${TMPVISDIR}/T1.nii.gz -out ${TMPVISDIR}/T1ce_2T1.nii.gz -init ${TMPVISDIR}/T1ce_2T1.mat -applyxfm
+		if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2T1.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T1ce_2T1_brain.nii.gz
+		elif [ -f "${TMPVISDIR}/T2_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2T1.nii.gz -mul ${TMPVISDIR}/T2_brain_mask.nii.gz ${TMPVISDIR}/T1ce_2T1_brain.nii.gz
+		elif [ -f "${TMPVISDIR}/T1_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2T1.nii.gz -mul ${TMPVISDIR}/T1_brain_mask.nii.gz ${TMPVISDIR}/T1ce_2T1_brain.nii.gz
+		else
+		$FSLDIR/bin/bet ${TMPVISDIR}/T1ce_2T1.nii.gz ${TMPVISDIR}/T1ce_2T1_brain.nii.gz
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2T1_brain.nii.gz -bin -fillh ${TMPVISDIR}/T1ce_brain_mask.nii.gz
+		fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T1ce_2T1_brain.nii.gz ${outdir}/${outname}_T1ce.nii.gz
+	fi	
+# CONSIDERING T1CE AS BASE MODALITY; PROCESSING AVAILABLE MODALITIES WRT T1CE (IF FLAIR, TAKE BRAIN_MASK FROM FLAIR)
+elif [[ $base_type == 't1ce' ]]; then
+	if [ $flairflag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/FLAIR_brain.nii.gz -ref ${TMPVISDIR}/T1ce_brain.nii.gz -out ${TMPVISDIR}/FLAIR_2T1ce.nii.gz -omat ${TMPVISDIR}/FLAIR_2T1ce.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/FLAIR.nii.gz -ref ${TMPVISDIR}/T1ce.nii.gz -out ${TMPVISDIR}/FLAIR_2T1ce.nii.gz -init ${TMPVISDIR}/FLAIR_2T1ce.mat -applyxfm
+	$FSLDIR/bin/bet ${TMPVISDIR}/FLAIR_2T1ce.nii.gz ${TMPVISDIR}/FLAIR_2T1ce_brain.nii.gz
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/FLAIR_2T1ce_brain.nii.gz -bin -fillh ${TMPVISDIR}/FLAIR_brain_mask.nii.gz
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/FLAIR_2T1ce_brain.nii.gz ${outdir}/${outname}_FLAIR.nii.gz
+	fi
+	if [ $t2flag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T2_brain.nii.gz -ref ${TMPVISDIR}/T1ce_brain.nii.gz -out ${TMPVISDIR}/T2_2T1ce.nii.gz -omat ${TMPVISDIR}/T2_2T1ce.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T2.nii.gz -ref ${TMPVISDIR}/T1ce.nii.gz -out ${TMPVISDIR}/T2_2T1ce.nii.gz -init ${TMPVISDIR}/T2_2T1ce.mat -applyxfm
+		if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T2_2T1ce.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T2_2T1ce_brain.nii.gz
+		else
+		$FSLDIR/bin/bet ${TMPVISDIR}/T2_2T1ce.nii.gz ${TMPVISDIR}/T2_2T1ce_brain.nii.gz
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T2_2T1ce_brain.nii.gz -bin -fillh ${TMPVISDIR}/T2_brain_mask.nii.gz
+		fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T2_2T1ce_brain.nii.gz ${outdir}/${outname}_T2.nii.gz
+	fi
+	if [ $t1flag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T1_brain.nii.gz -ref ${TMPVISDIR}/T1ce_brain.nii.gz -out ${TMPVISDIR}/T1_2T1ce.nii.gz -omat ${TMPVISDIR}/T1_2T1ce.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T1.nii.gz -ref ${TMPVISDIR}/T1ce.nii.gz -out ${TMPVISDIR}/T1_2T1ce.nii.gz -init ${TMPVISDIR}/T1_2T1ce.mat -applyxfm
+		if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1_2T1ce.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T1_2T1ce_brain.nii.gz
+		elif [ -f "${TMPVISDIR}/T2_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1_2T1ce.nii.gz -mul ${TMPVISDIR}/T2_brain_mask.nii.gz ${TMPVISDIR}/T1_2T1ce_brain.nii.gz
+		else
+		$FSLDIR/bin/bet ${TMPVISDIR}/T1_2T1ce.nii.gz ${TMPVISDIR}/T1_2T1ce_brain.nii.gz
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1_2T1ce_brain.nii.gz -bin -fillh ${TMPVISDIR}/T1_brain_mask.nii.gz
+		fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T1_2T1ce_brain.nii.gz ${outdir}/${outname}_T1.nii.gz
+	fi	
+	if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T1ce_brain.nii.gz
+	elif [ -f "${TMPVISDIR}/T2_brain_mask.nii.gz" ]; then
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce.nii.gz -mul ${TMPVISDIR}/T2_brain_mask.nii.gz ${TMPVISDIR}/T1ce_brain.nii.gz
+	elif [ -f "${TMPVISDIR}/T1_brain_mask.nii.gz" ]; then
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce.nii.gz -mul ${TMPVISDIR}/T1_brain_mask.nii.gz ${TMPVISDIR}/T1ce_brain.nii.gz
+	else
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce.nii.gz -mul ${TMPVISDIR}/T1_brain_mask.nii.gz ${TMPVISDIR}/T1ce_brain.nii.gz
+	fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T1ce_brain.nii.gz ${outdir}/${outname}_T1ce.nii.gz
+elif [[ $base_type == 't2' ]]; then
+	if [ $flairflag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/FLAIR_brain.nii.gz -ref ${TMPVISDIR}/T1ce_brain.nii.gz -out ${TMPVISDIR}/FLAIR_2T1ce.nii.gz -omat ${TMPVISDIR}/FLAIR_2T1ce.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/FLAIR.nii.gz -ref ${TMPVISDIR}/T1ce.nii.gz -out ${TMPVISDIR}/FLAIR_2T1ce.nii.gz -init ${TMPVISDIR}/FLAIR_2T1ce.mat -applyxfm
+	$FSLDIR/bin/bet ${TMPVISDIR}/FLAIR_2T1ce.nii.gz ${TMPVISDIR}/FLAIR_2T1ce_brain.nii.gz
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/FLAIR_2T1ce_brain.nii.gz -bin -fillh ${TMPVISDIR}/FLAIR_brain_mask.nii.gz
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/FLAIR_2T1ce_brain.nii.gz ${outdir}/${outname}_FLAIR.nii.gz
+	fi
+	if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T2.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T2_brain.nii.gz
+	else
+	$FSLDIR/bin/fslmaths ${TMPVISDIR}/T2_brain.nii.gz -bin -fillh ${TMPVISDIR}/T2_brain_mask.nii.gz
+	fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T2_brain.nii.gz ${outdir}/${outname}_T2.nii.gz
+	if [ $t1flag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T1_brain.nii.gz -ref ${TMPVISDIR}/T2_brain.nii.gz -out ${TMPVISDIR}/T1_2T2.nii.gz -omat ${TMPVISDIR}/T1_2T2.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T1.nii.gz -ref ${TMPVISDIR}/T2.nii.gz -out ${TMPVISDIR}/T1_2T2.nii.gz -init ${TMPVISDIR}/T1_2T2.mat -applyxfm
+		if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1_2T2.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T1_2T2_brain.nii.gz
+		elif [ -f "${TMPVISDIR}/T2_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1_2T2.nii.gz -mul ${TMPVISDIR}/T2_brain_mask.nii.gz ${TMPVISDIR}/T1_2T2_brain.nii.gz
+		else
+		$FSLDIR/bin/bet ${TMPVISDIR}/T1_2T2.nii.gz ${TMPVISDIR}/T1_2T2_brain.nii.gz
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1_2T2_brain.nii.gz -bin -fillh ${TMPVISDIR}/T1_brain_mask.nii.gz
+		fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T1_2T2_brain.nii.gz ${outdir}/${outname}_T1.nii.gz
+	fi
+	if [ $t1ceflag -eq 1 ] ; then
+	$FSLDIR/bin/flirt -dof 6 -in ${TMPVISDIR}/T1ce_brain.nii.gz -ref ${TMPVISDIR}/T2_brain.nii.gz -out ${TMPVISDIR}/T1ce_2T2.nii.gz -omat ${TMPVISDIR}/T1ce_2T2.mat
+	$FSLDIR/bin/flirt -in ${TMPVISDIR}/T1ce.nii.gz -ref ${TMPVISDIR}/T2.nii.gz -out ${TMPVISDIR}/T1ce_2T2.nii.gz -init ${TMPVISDIR}/T1ce_2T2.mat -applyxfm
+		if [ -f "${TMPVISDIR}/FLAIR_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2T2.nii.gz -mul ${TMPVISDIR}/FLAIR_brain_mask.nii.gz ${TMPVISDIR}/T1ce_2T2_brain.nii.gz
+		elif [ -f "${TMPVISDIR}/T2_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2T2.nii.gz -mul ${TMPVISDIR}/T2_brain_mask.nii.gz ${TMPVISDIR}/T1ce_2T2_brain.nii.gz
+		elif [ -f "${TMPVISDIR}/T1_brain_mask.nii.gz" ]; then
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2T2.nii.gz -mul ${TMPVISDIR}/T1_brain_mask.nii.gz ${TMPVISDIR}/T1ce_2T2_brain.nii.gz
+		else
+		$FSLDIR/bin/bet ${TMPVISDIR}/T1ce_2T2.nii.gz ${TMPVISDIR}/T1ce_2T2_brain.nii.gz
+		$FSLDIR/bin/fslmaths ${TMPVISDIR}/T1ce_2T2_brain.nii.gz -bin -fillh ${TMPVISDIR}/T1ce_brain_mask.nii.gz
+		fi
+	${FSLDIR}/bin/imcp ${TMPVISDIR}/T1ce_2T2_brain.nii.gz ${outdir}/${outname}_T1ce.nii.gz
+	fi	
+fi
+
+# REMOVES TEMPORARY DIRECTORY
+rm -r ${TMPVISDIR}
+
+exit 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
