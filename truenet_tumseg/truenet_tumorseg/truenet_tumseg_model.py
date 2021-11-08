@@ -23,18 +23,18 @@ class TrUENetTumSeg(nn.Module):
         self.n_layers = 3
         self.bilinear = bilinear
 
-        self.inpconv = truenet_tumseg_model_utils.OutConv(n_channels, 3, name="inpconv_")
+        self.inpconv = truenet_tumseg_model_utils.OutConv(n_channels, 3)
         if plane == 'axial' or plane == 'tc':
-            self.convfirst = truenet_tumseg_model_utils.DoubleConv(3, init_channels, 3, name="convfirst_")
+            self.convfirst = truenet_tumseg_model_utils.DoubleConv(3, init_channels, 3)
         else:
-            self.convfirst = truenet_tumseg_model_utils.DoubleConv(3, init_channels, 5, name="convfirst_")
-        self.down1 = truenet_tumseg_model_utils.Down(init_channels, init_channels*2, 3, name="down1_")
-        self.down2 = truenet_tumseg_model_utils.Down(init_channels*2, init_channels*4, 3, name="down2_")
-        self.down3 = truenet_tumseg_model_utils.Down(init_channels*4, init_channels*8, 3, name="down3_")
-        self.up3 = truenet_tumseg_model_utils.Up(init_channels*8, init_channels*4, 3, "up3_", bilinear)
-        self.up2 = truenet_tumseg_model_utils.Up(init_channels*4, init_channels*2, 3, "up2_", bilinear)
-        self.up1 = truenet_tumseg_model_utils.Up(init_channels*2, init_channels, 3, "up1_", bilinear)
-        self.outconv = truenet_tumseg_model_utils.OutConv(init_channels, n_classes, name="outconv_")
+            self.convfirst = truenet_tumseg_model_utils.DoubleConv(3, init_channels, 5)
+        self.down1 = truenet_tumseg_model_utils.Down(init_channels, init_channels*2, 3)
+        self.down2 = truenet_tumseg_model_utils.Down(init_channels*2, init_channels*4, 3)
+        self.down3 = truenet_tumseg_model_utils.Down(init_channels*4, init_channels*8, 3)
+        self.up3 = truenet_tumseg_model_utils.Up(init_channels*8, init_channels*4, 3, bilinear)
+        self.up2 = truenet_tumseg_model_utils.Up(init_channels*4, init_channels*2, 3, bilinear)
+        self.up1 = truenet_tumseg_model_utils.Up(init_channels*2, init_channels, 3, bilinear)
+        self.outconv = truenet_tumseg_model_utils.OutConv(init_channels, n_classes)
 
     def forward(self, x):
         xi = self.inpconv(x)
