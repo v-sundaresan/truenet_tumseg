@@ -15,7 +15,7 @@
 - Sundaresan, V., Zamboni, G., Rothwell, P.M., Jenkinson, M. and Griffanti, L., 2021. Triplanar ensemble U-Net model for white matter hyperintensities segmentation on MR images. Medical Image Analysis, p.102184. [DOI: https://doi.org/10.1016/j.media.2021.102184] (preprint available at [DOI: https://doi.org/10.1101/2020.07.24.219485])
 
 Also refer to the following paper to know more about truenet fine-tuning:
-- Sundaresan, V., Zamboni, G., Dinsdale, N. K., Rothwell, P. M., Griffanti, L., & Jenkinson, M. (2021). Comparison of domain adaptation techniques for white matter hyperintensity segmentation in brain MR images. bioRxiv. [DOI: https://doi.org/10.1101/2021.03.12.435171] (accepted in Medical Image Analysis, DOI to be updated soon.)
+- Sundaresan, V., Zamboni, G., Dinsdale, N. K., Rothwell, P. M., Griffanti, L., & Jenkinson, M. (2021). Comparison of domain adaptation techniques for white matter hyperintensity segmentation in brain MR images. Medical Image Analysis, p. 102215. [DOI: https://doi.org/10.1016/j.media.2021.102215] (preprint available at [DOI: https://doi.org/10.1101/2021.03.12.435171])
 
 ## TrUE-Net tumour segmentation results:
 <img width="750"
@@ -244,8 +244,8 @@ If you use the tool from this repository, please cite the following papers (jour
 
 - Sundaresan V., Griffanti L., Jenkinson M. (2021) Brain Tumour Segmentation Using a Triplanar Ensemble of U-Nets on MR Images. In: Crimi A., Bakas S. (eds) Brainlesion: Glioma, Multiple Sclerosis, Stroke and Traumatic Brain Injuries. BrainLes 2020. Lecture Notes in Computer Science, vol 12658. Springer, Cham. [DOI: https://doi.org/10.1007/978-3-030-72084-1_31]
 - Sundaresan, V., Griffanti, L. and Jenkinson, M., 2021. Brain tumour segmentation using a triplanar ensemble of U-Nets. arXiv preprint arXiv:2105.11356.
-- Sundaresan, V., Zamboni, G., Rothwell, P.M., Jenkinson, M. and Griffanti, L., 2021. Triplanar ensemble U-Net model for white matter hyperintensities segmentation on MR images. Medical Image Analysis, p.102184. [DOI: https://doi.org/10.1016/j.media.2021.102184] (preprint available at [DOI: https://doi.org/10.1101/2020.07.24.219485])
-- Sundaresan, V., Zamboni, G., Dinsdale, N. K., Rothwell, P. M., Griffanti, L., & Jenkinson, M. (2021). Comparison of domain adaptation techniques for white matter hyperintensity segmentation in brain MR images. bioRxiv. [DOI: https://doi.org/10.1101/2021.03.12.435171]
+- Sundaresan, V., Zamboni, G., Rothwell, P.M., Jenkinson, M. and Griffanti, L., 2021. Triplanar ensemble U-Net model for white matter hyperintensities segmentation on MR images. Medical Image Analysis, p.102184. [DOI: https://doi.org/10.1016/j.media.2021.102184] (preprint available at [DOI: https://doi.org/10.1101/2020.07.24.219485]).
+- Sundaresan, V., Zamboni, G., Dinsdale, N. K., Rothwell, P. M., Griffanti, L., & Jenkinson, M. (2021). Comparison of domain adaptation techniques for white matter hyperintensity segmentation in brain MR images. Medical Image Analysis, p. 102215. [DOI: https://doi.org/10.1016/j.media.2021.102215] (preprint available at [DOI: https://doi.org/10.1101/2021.03.12.435171]).
 
 
 
