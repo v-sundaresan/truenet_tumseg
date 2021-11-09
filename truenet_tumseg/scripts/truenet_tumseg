@@ -58,7 +58,7 @@ if __name__ == "__main__":
     optionalNamedevaluate = parser_evaluate.add_argument_group('Optional named arguments')
     optionalNamedevaluate.add_argument('-modality', '--select_modality', nargs='+', type=int, required=False, default=[1, 1, 1, 1, 0], help='Input modalities available to train; format={FLAIR, T1, T1ce, T2, Others} (default=1 1 1 1 0)')
     optionalNamedevaluate.add_argument('-p', '--pretrained_model', type=bool, required=False, default=False, help='Whether to use a standard pre-trained model from MICCAI BraTS 2020 training data (default=False)')
-    optionalNamedevaluate.add_argument('-nclass', '--num_classes', type = int, required=False, default=2,
+    optionalNamedevaluate.add_argument('-nclass', '--num_classes', type = int, required=False, default=4,
                                 help='Number of classes in the labels used for training the model (for both pretrained models, -nclass=2) (default=2)')
     optionalNamedevaluate.add_argument('-post', '--postprocessing', type=bool, required=False, default=True, help='Whether to perform post-processing for TC region (default=True)')
     optionalNamedevaluate.add_argument('-int', '--intermediate', type=bool, required=False, default=False, help='Saving intermediate predictionss (individual planes) for each subject (default=False)')
