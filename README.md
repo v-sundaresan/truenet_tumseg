@@ -14,7 +14,7 @@
 - Sundaresan, V., Griffanti, L. and Jenkinson, M., 2021. Brain tumour segmentation using a triplanar ensemble of U-Nets. arXiv preprint arXiv:2105.11356.
 - Sundaresan, V., Zamboni, G., Rothwell, P.M., Jenkinson, M. and Griffanti, L., 2021. Triplanar ensemble U-Net model for white matter hyperintensities segmentation on MR images. Medical Image Analysis, p.102184. [DOI: https://doi.org/10.1016/j.media.2021.102184] (preprint available at [DOI: https://doi.org/10.1101/2020.07.24.219485])
 
-Also refer to the following paper to know more about truenet fine-tuning:
+Also cite the following paper if you use truenet fine-tuning:
 - Sundaresan, V., Zamboni, G., Dinsdale, N. K., Rothwell, P. M., Griffanti, L., & Jenkinson, M. (2021). Comparison of domain adaptation techniques for white matter hyperintensity segmentation in brain MR images. Medical Image Analysis, p. 102215. [DOI: https://doi.org/10.1016/j.media.2021.102215] (preprint available at [DOI: https://doi.org/10.1101/2021.03.12.435171])
 
 ## TrUE-Net tumour segmentation results:
