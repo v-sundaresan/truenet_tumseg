@@ -50,21 +50,24 @@ We used FLAIR, T1, T1 CE and T2 as inputs for the model. We reoriented the image
 
 ## prepare_tumseg_data
 ```
-Usage: prepare_tumseg_data <Base_modality_type> <output_basename> <FLAIR_image_name> <T1_image_name> <T1ce_image_name> <T2_image_name>
+Usage: prepare_tumseg_data --basemodality=<basemodality_name> --outname=<output_basename> --FLAIR=<FLAIR_image_name> --T1=<T1_image_name> --T1ce=<T1ce_image_name> --T2=<T2_image_name> [--keepintermediate] [-savelog]
  
 The script applies the preprocessing pipeline on FLAIR, T1, T1ce and T2 to be used in FSL truenet_tumseg with a specified output basename
 Base_modality_name and output_basename are mandatory inputs
-Remaining inputs are optional, image corresponding to Base_modality_name must be provided. Images to be provided in the given order.
-In case you do not have a modality, provide 'None' for that modality.
-Base_modality_name = 	name of the modality that the rest will be registered to (preferable ~1mm iso); valid options: flair, t1, t1ce, t2
-output_basename = 	name to be used for the processed images (use absolute path); output_basename_FLAIR.nii.gz, output_basename_T1.nii.gz .... will be saved
-FLAIR_image_name = 	name of the input unprocessed FLAIR image
-T1_image_name = 	name of the input unprocessed T1 image
+Remaining inputs are optional, image corresponding to Base_modality_name must be provided.
+The script applies the preprocessing pipeline on FLAIR, T1 and WM mask to be used in FSL truenet with a specified output basename
+basemodality_name		= 	name of the modality that the rest will be registered to (preferable ~1mm iso); 
+  									valid options: flair, t1, t1ce, t2
+output_basename 		= 	absolute/relative path for the processed FLAIR and T1 images; output_basename_FLAIR.nii.gz, output_basename_T1.nii.gz etc. will be saved
+FLAIR_image_name 		= 	absolute/relative path of the input unprocessed FLAIR image with the nifti file
+T1_image_name 			= 	absolute/relative path of the input unprocessed T1 image with the nifti file
 T1ce_image_name = 	name of the input unprocessed T1-contrast enhanced image
 T2_image_name = 	name of the input unprocessed T2 image
-
-For example, if you have flair, t1 and t2 and want to register everything to t1, use the following command
-prepare_tumseg_data t1 path/to/outputbasename path/to/input_flair.nii.gz path/to/input_t1.nii.gz None path/to/input_t2.nii.gz 
+specify --keepintermediate if you want to save intermediate results
+specify --savelog for saving the comments (steps in preprocessing) in a log file
+ 
+For example, if you have flair, t1 and t2 and want to register everything to t1, and want to keep intermediate files, use the following command
+prepare_tumseg_data --basemodality=t1 --outname=path/to/outputbasename --FLAIR=path/to/input_flair.nii.gz --T1=path/to/input_t1.nii.gz --T2=path/to/input_t2.nii.gz --keepintermediate
 ```
 
 ## Running truenet brain tumor segmentation
