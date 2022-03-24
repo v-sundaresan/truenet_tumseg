@@ -2,6 +2,6 @@ nibabel>=2.*
 scipy
 torch
 numpy
-
+scikit-image
 
 
