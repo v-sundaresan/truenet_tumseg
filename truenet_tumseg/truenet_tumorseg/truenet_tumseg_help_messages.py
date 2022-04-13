@@ -1,33 +1,33 @@
 import pkg_resources
 
 #=========================================================================================
-# Truenet help, description and epilog messages to display
+# Truenet_tumseg help, description and epilog messages to display
 # Vaanathi Sundaresan
 # 09-03-2021, Oxford
 #=========================================================================================
 
 def help_descs():
-    version = pkg_resources.require("truenet")[0].version
+    version = pkg_resources.require("truenet_tumseg")[0].version
     helps = {
         'mainparser' :
-        "truenet: Triplanar ensemble U-Net model, v" + str(version) + "\n" 
+        "truenet_tumseg: Triplanar ensemble U-Net model for tumour segmentation, v" + str(version) + "\n" 
         "   \n" 
         "Sub-commands available:\n" 
-        "       truenet train           Training a TrUE-Net model from scratch\n"
-        "       truenet evaluate        Applying a saved/pretrained TrUE-Net model for testing\n"
-        "       truenet fine_tune       Fine-tuning a saved/pretrained TrUE-Net model\n"
-        "       truenet cross_validate  Cross-validation of TrUE-Net model\n"
+        "       truenet_tumseg train           Training a TrUE-Net model from scratch\n"
+        "       truenet_tumseg evaluate        Applying a saved/pretrained TrUE-Net model for testing\n"
+        "       truenet_tumseg fine_tune       Fine-tuning a saved/pretrained TrUE-Net model\n"
+        "       truenet_tumseg cross_validate  Cross-validation of TrUE-Net model\n"
         "   \n"
         "   \n"
         "For detailed help regarding the options for each command,\n"
-        "type truenet <command> --help (e.g. truenet train --help)\n"
+        "type truenet_tumseg <command> --help (e.g. truenet train --help)\n"
         "   \n",
 
         'train' :
         '   \n'
-        'truenet train: training the TrUE-Net model from scratch, v' + str(version) + '\n'
+        'truenet_tumseg train: training the TrUE-Net model for tumour segmentation from scratch, v' + str(version) + '\n'
         '   \n'
-        'Usage: truenet train -i <input_directory> -m <model_directory> [options]\n'
+        'Usage: truenet_tumseg train -i <input_directory> -m <model_directory> [options]\n'
         '   \n'
         'Compulsory arguments:\n'
         '       -i, --inp_dir                 Path to the directory containing FLAIR and T1 images for training\n'
@@ -58,9 +58,9 @@ def help_descs():
         '   \n',
 
         'evaluate' :
-        'truenet evaluate: testing the TrUE-Net model, v' + str(version) + '\n'
+        'truenet_tumseg evaluate: testing the TrUE-Net model for tumour segmentation, v' + str(version) + '\n'
         '   \n'
-        'Usage: truenet evaluate -i <input_directory> -m <model_directory> -o <output_directory> [options]'
+        'Usage: truenet_tumseg evaluate -i <input_directory> -m <model_directory> -o <output_directory> [options]'
         '   \n'
         'Compulsory arguments:\n'
         '       -i, --inp_dir                         Path to the directory containing FLAIR and T1 images for testing\n'
@@ -78,9 +78,9 @@ def help_descs():
         '   \n',
 
         'fine_tune' :
-        'truenet fine_tune: training the TrUE-Net model from scratch, v' + str(version) + '\n'
+        'truenet_tumseg fine_tune: training the TrUE-Net model for tumour segmentation from scratch, v' + str(version) + '\n'
         '   \n'
-        'Usage: truenet fine_tune -i <input_directory> -m <model_directory> -o <output_directory> [options]\n'
+        'Usage: truenet_tumseg fine_tune -i <input_directory> -m <model_directory> -o <output_directory> [options]\n'
         '   \n'
         '   \n'
         'Compulsory arguments:\n'
@@ -118,9 +118,9 @@ def help_descs():
         '   \n',
 
         'cross_validate' :
-        'truenet cross_validate: cross-validation of the TrUE-Net model, v' + str(version) + '\n'                                                                                            
+        'truenet_tumseg cross_validate: cross-validation of the TrUE-Net model for tumour segmentation, v' + str(version) + '\n'                                                                                            
         '   \n'
-        'Usage: truenet cross_validate -i <input_directory> -o <output_directory> [options]\n'
+        'Usage: truenet_tumseg cross_validate -i <input_directory> -o <output_directory> [options]\n'
         '   \n'
         '   \n'
         'Compulsory arguments:\n'
@@ -153,10 +153,10 @@ def help_descs():
     return helps
 
 def desc_descs():
-    version = pkg_resources.require("truenet")[0].version
+    version = pkg_resources.require("truenet_tumseg")[0].version
     descs = {
         'mainparser' :
-        "truenet: Triplanar ensemble U-Net model, v" + str(version) + "\n"
+        "truenet_tumseg: Triplanar ensemble U-Net model for tumour segmentation, v" + str(version) + "\n"
         "   \n"
         "Sub-commands available:\n"
         "       truenet train           Training a TrUE-Net model from scratch\n"
@@ -167,7 +167,7 @@ def desc_descs():
 
         'train' :
         '   \n'
-        'truenet: Triplanar ensemble U-Net model, v' + str(version) + '\n'
+        'truenet_tumseg: Triplanar ensemble U-Net model for tumour segmentation, v' + str(version) + '\n'
         '   \n'                                                             
         'The \'train\' command trains the TrUE-Net model from scratch using the training subjects specified in\n'
         'the input directory. The FLAIR and T1 volumes should be named as \'<subj_name>_FLAIR.nii.gz\'\n'
@@ -176,7 +176,7 @@ def desc_descs():
 
         'evaluate' :
         '   \n'
-        'truenet: Triplanar ensemble U-Net model, v' + str(version) + '\n'
+        'truenet_tumseg: Triplanar ensemble U-Net model for tumour segmentation, v' + str(version) + '\n'
         '   \n'                                                             
         'The \'evaluate\' command is used for testing the TrUE-Net model on the test subjects specified in\n'
         'the input directory. The FLAIR and T1 volumes should be named as \'<subj_name>_FLAIR.nii.gz\' and\n'
@@ -185,7 +185,7 @@ def desc_descs():
 
         'fine_tune':
         '   \n'
-        'truenet: Triplanar ensemble U-Net model, v' + str(version) + '\n'
+        'truenet_tumseg: Triplanar ensemble U-Net model for tumour segmentation, v' + str(version) + '\n'
         '   \n'
         'The \'fine_tune\' command fine-tunes a pretrained TrUE-Net model (from a model directory) on the\n'
         'training subjects specified in the input directory. The FLAIR and T1 volumes should be named as\n'
@@ -194,7 +194,7 @@ def desc_descs():
 
         'cross_validate':
         '   \n'
-        'truenet: Triplanar ensemble U-Net model, v' + str(version) + '\n'
+        'truenet_tumseg: Triplanar ensemble U-Net model for tumour segmentation, v' + str(version) + '\n'
         '   \n'
         'The \'cross_validate\' command performs cross-validation of the TrUE-Net model on the\n'
         'subjects specified in the input directory. The FLAIR and T1 volumes should be named as\n'
@@ -208,7 +208,7 @@ def epilog_descs():
         'mainparser' :
         "   \n"
         "For detailed help regarding the options for each command,\n"
-        "type truenet <command> --help or -h (e.g. truenet train --help, truenet train -h)\n"
+        "type truenet_tumseg <command> --help or -h (e.g. truenet_tumseg train --help, truenet train -h)\n"
         "   \n",
 
         'subparsers' :
