@@ -159,10 +159,10 @@ def desc_descs():
         "truenet_tumseg: Triplanar ensemble U-Net model for tumour segmentation, v" + str(version) + "\n"
         "   \n"
         "Sub-commands available:\n"
-        "       truenet train           Training a TrUE-Net model from scratch\n"
-        "       truenet evaluate        Applying a saved/pretrained TrUE-Net model for testing\n"
-        "       truenet fine_tune       Fine-tuning a saved/pretrained TrUE-Net model \n"
-        "       truenet cross_validate  Cross-validation of TrUE-Net model\n"
+        "       truenet_tumseg train           Training a TrUE-Net model from scratch\n"
+        "       truenet_tumseg evaluate        Applying a saved/pretrained TrUE-Net model for testing\n"
+        "       truenet_tumseg fine_tune       Fine-tuning a saved/pretrained TrUE-Net model \n"
+        "       truenet_tumseg cross_validate  Cross-validation of TrUE-Net model\n"
         "   \n",
 
         'train' :
